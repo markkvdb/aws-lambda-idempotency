@@ -64,3 +64,10 @@ package:
 functions:
   idempotency_test:
     handler: app.lambda_handler
+
+custom:
+  pythonRequirements:
+    usePoetry: true
+
+plugins:
+  - serverless-python-requirements
