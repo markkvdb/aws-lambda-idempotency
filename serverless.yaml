@@ -1,0 +1,66 @@
+# Welcome to Serverless!
+
+service: idempotency-test
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: "3"
+configValidationMode: error
+
+provider:
+  name: aws
+  runtime: python3.11
+
+  # you can overwrite defaults here
+  stage: ${opt:stage, "prod"}
+  region: eu-west-3
+
+  # you can add statements to the Lambda function's IAM Role here
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:ListBucket"
+          Resource:
+            {
+              "Fn::Join":
+                [
+                  "",
+                  ["arn:aws:s3:::", { "Ref": "ServerlessDeploymentBucket" }],
+                ],
+            }
+
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: { "Fn::GetAtt": ["IdempotencyTable.Arn"] }
+
+resources:
+  Resources:
+    IdempotencyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: expiration
+          Enabled: true
+        BillingMode: PAY_PER_REQUEST
+
+
+package:
+  patterns:
+    - "!./**"
+    - app.py
+
+functions:
+  idempotency_test:
+    handler: app.lambda_handler
