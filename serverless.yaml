@@ -46,6 +46,7 @@ resources:
     IdempotencyTable:
       Type: AWS::DynamoDB::Table
       Properties:
+        TableName: IdempotencyTable
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
