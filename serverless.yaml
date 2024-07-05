@@ -31,13 +31,15 @@ provider:
                 ],
             }
 
-        - Effect: Allow
+        - Sid: AllowDynamodbReadWrite
+          Effect: Allow
           Action:
             - dynamodb:PutItem
             - dynamodb:GetItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource: { "Fn::GetAtt": ["IdempotencyTable.Arn"] }
+          Resource:
+            - "Fn::GetAtt": [ IdempotencyTable, Arn ]
 
 resources:
   Resources:
